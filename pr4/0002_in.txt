@@ -1,0 +1,9 @@
+1 12
+1 2 3
+4 1 2 3 4 1 2
+3 4
+count 0
+list 9
+count 10
+list 10
+buy 10

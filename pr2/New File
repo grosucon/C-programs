@@ -1,0 +1,92 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct zpravy {
+    long long int fi,se;
+}ZPRAVY;
+/*-----------------------------------------------------------------------*/
+int myPow(int base, int exponent) {
+    int n = 1;
+    for (int i = 0; i < exponent; i++) {
+        n *= base;
+    }
+    return n;
+}
+/*-----------------------------------------------------------------------*/
+long long int delka_z ( int *alph ){
+    int i;
+    long long int delka=0, a;
+    for (i=0;i<26;i++){
+        a=myPow(2, i);
+        delka+=(a * alph[i]);
+    }
+    return delka;
+}
+/*-----------------------------------------------------------------------*/
+int main() {
+
+    int alphabet[26];
+    char sym;
+    int cod_a, m=0, i, j;
+    ZPRAVY *news=NULL;
+
+    memset(alphabet, 0, 26*sizeof(int));
+    printf("Zpravy:\n");
+
+    news=(ZPRAVY*) malloc( 2 * sizeof(ZPRAVY) );
+
+    for(j=0;j<2;j++){
+        while (1) {
+            if ( (sym=fgetc(stdin)) == '\n' )
+                break;
+
+            cod_a = sym;
+            if (cod_a >= 97 && cod_a <= 122) {
+                alphabet[cod_a - 97]++;
+            } else {
+                if ( sym != '|') {
+                    printf("Nespravny vstup.\n");
+                    return 0;
+                } else {
+                    news[j].fi = delka_z(alphabet);
+                    memset(alphabet, 0, 26*sizeof(int));
+                    m++;
+                }
+            }
+        }
+
+        news[j].se=delka_z(alphabet);
+        memset(alphabet, 0, 26*sizeof(int));
+    }
+
+    if ( m != 2 || (news[0].se + news[0].fi)==0 || (news[1].se + news[1].fi)==0 ){
+        printf("Nespravny vstup.\n");
+        return 0;
+    }
+
+    if ( (news[0].fi==0&&news[1].fi==0) || (news[0].fi==0&&news[1].se==0) || (news[0].se==0&&news[1].fi==0) || (news[0].se==0&&news[1].se==0) ) {
+        printf("Synchronizace za: 0\n");
+        return 0;
+    }
+
+    for (i=0;i<2;i++) {
+        news[i].se += news[i].fi;
+    }
+
+    while ( news[1].fi != news[0].fi ){
+        if ( news[1].fi > news[0].fi )
+            news[0].fi+=news[0].se;
+        if ( news[1].fi < news[0].fi )
+            news[1].fi+=news[1].se;
+        if ( news[0].se * news[1].se < news[0].fi ){
+            printf("Nelze dosahnout.\n");
+            return 0;
+        }
+    }
+
+    printf("Synchronizace za: %lld\n", news[0].fi);
+
+    free(news);
+    return 0;
+}
